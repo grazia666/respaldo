@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  respaldo-server:
+    build: ./servidor-respaldo
+    container_name: respaldo-server
+    ports:
+      - "1445:445"
+      - "1139:139"
+    volumes:
+      - respaldo_data:/srv/respaldo
+    networks:
+      - red_respaldo
+    restart: unless-stopped
+
+volumes:
+  respaldo_data:
+
+networks:
+  red_respaldo:
+    driver: bridge
