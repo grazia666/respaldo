@@ -1,24 +1,23 @@
 #!/bin/bash
 # Script de respaldo automático desde cliente Linux hacia servidor Samba en Docker
 
-# === CONFIGURACIÓN ===
-ORIGEN="/home/respaldo_origen"           # Carpeta local con archivos a respaldar
-DESTINO="//respaldo-server/Respaldo"     # Nombre del servicio Samba (Docker Compose)
-USUARIO="respaldo"                       # Usuario Samba
-PASSWORD="1234"                          # Contraseña Samba
-PORT=445                                 # Puerto Samba (445 estándar)
+ORIGEN="/home/respaldo_origen"
+DESTINO="//respaldo-server/Respaldo"
+USUARIO="respaldo"
+PASSWORD="1234"
+PORT=445
 
-# Crear carpeta origen si no existe
+SMBCLIENT=$(which smbclient)
+
 mkdir -p "$ORIGEN"
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Iniciando respaldo..." 
 
-# Recorrer todos los archivos de la carpeta de origen
 for archivo in "$ORIGEN"/*; do
     if [ -f "$archivo" ]; then
-        nombre_archivo=$(basename "$archivo")   # Solo el nombre, sin ruta
+        nombre_archivo=$(basename "$archivo")
         echo "Subiendo: $nombre_archivo"
-        smbclient "$DESTINO" -p $PORT -U "$USUARIO%$PASSWORD" \
+        $SMBCLIENT "$DESTINO" -p $PORT -U "$USUARIO%$PASSWORD" \
             -c "put \"$archivo\" \"$nombre_archivo\"" 2>&1
     fi
 done
