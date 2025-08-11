@@ -1,8 +1,11 @@
 version: '3.9'
 
 services:
+  # Servidor Samba para respaldos
   respaldo-server:
-    build: ./servidor-respaldo
+    build:
+      context: ./servidor-respaldo
+      dockerfile: Dockerfile
     container_name: respaldo-server
     ports:
       - "1445:445"
@@ -11,6 +14,20 @@ services:
       - respaldo_data:/srv/respaldo
     networks:
       - red_respaldo
+    restart: unless-stopped
+
+  # Cliente Linux con cron
+  cliente-linux:
+    build:
+      context: .
+      dockerfile: cliente-linux/Dockerfile
+    container_name: cliente-linux
+    depends_on:
+      - respaldo-server
+    networks:
+      - red_respaldo
+    volumes:
+      - ./pruebas_cliente:/home/respaldo_origen
     restart: unless-stopped
 
 volumes:

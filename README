@@ -1,0 +1,12 @@
+# Sistema de Respaldo Centralizado
+
+Este contenedor contiene un servidor Ubuntu con Samba para compartir una carpeta `/srv/respaldo` accesible desde clientes Linux y Windows.
+
+## Servicios
+
+- `respaldo-server`: Contenedor Ubuntu con carpeta compartida vía Samba.
+
+## Comandos
+
+```bash
+docker-compose up -d

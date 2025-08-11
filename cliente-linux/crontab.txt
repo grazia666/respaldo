@@ -1,0 +1,2 @@
+* * * * * root /scripts/respaldo_linux.sh >> /var/log/respaldo.log 2>&1
+

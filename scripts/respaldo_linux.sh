@@ -1,26 +1,26 @@
 #!/bin/bash
+# Script de respaldo automático desde cliente Linux hacia servidor Samba en Docker
 
-# Ruta local a respaldar
-ORIGEN="/home/$(whoami)/Documentos"
+# === CONFIGURACIÓN ===
+ORIGEN="/home/respaldo_origen"           # Carpeta local con archivos a respaldar
+DESTINO="//respaldo-server/Respaldo"     # Nombre del servicio Samba (Docker Compose)
+USUARIO="respaldo"                       # Usuario Samba
+PASSWORD="1234"                          # Contraseña Samba
+PORT=445                                 # Puerto Samba (445 estándar)
 
-# Ruta remota del servidor de respaldo
-DESTINO="//localhost/Respaldo"
+# Crear carpeta origen si no existe
+mkdir -p "$ORIGEN"
 
-# Usuario de Samba
-USUARIO="guest"
-PASSWORD=""
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Iniciando respaldo..." 
 
-# Montaje temporal
-MOUNT_POINT="/mnt/respaldo"
+# Recorrer todos los archivos de la carpeta de origen
+for archivo in "$ORIGEN"/*; do
+    if [ -f "$archivo" ]; then
+        nombre_archivo=$(basename "$archivo")   # Solo el nombre, sin ruta
+        echo "Subiendo: $nombre_archivo"
+        smbclient "$DESTINO" -p $PORT -U "$USUARIO%$PASSWORD" \
+            -c "put \"$archivo\" \"$nombre_archivo\"" 2>&1
+    fi
+done
 
-# Crear punto de montaje si no existe
-mkdir -p "$MOUNT_POINT"
-
-# Montar carpeta Samba con credenciales
-sudo mount -t cifs "$DESTINO" "$MOUNT_POINT" -o username=$USUARIO,password=$PASSWORD,port=1445,vers=3.0
-
-# Sincronizar usando rsync
-rsync -av --delete "$ORIGEN"/ "$MOUNT_POINT"/linux_$(whoami)/
-
-# Desmontar
-sudo umount "$MOUNT_POINT"
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Respaldo finalizado."
